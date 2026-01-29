@@ -1,11 +1,13 @@
 import React, {
   createContext,
   useContext,
+  useEffect,
   useState,
   type ReactNode,
 } from "react";
 
 import type { LoginResponse } from "../types";
+import { apiService } from "../categories/api";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -30,45 +32,63 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  // LOGIN DISABLED - Always authenticated
-  const [isAuthenticated] = useState(true); // Changed to true - no login required
-  const [user] = useState<LoginResponse["user"] | null>({
-    id: 999999,
-    email: "admin@example.com",
-    name: "Admin User",
-    role: "admin",
-  } as LoginResponse["user"]);
-  const [loading] = useState(false); // Changed to false - no loading needed
+  // LOGIN DISABLED - Auto-login with hardcoded credentials
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<LoginResponse["user"] | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // useEffect(() => {
-  //   // Check if user is already logged in
-  //   const token = apiService.getToken();
-  //   if (token) {
-  //     // Token exists, but we need to verify it's valid
-  //     // For now, we'll assume it's valid and set authenticated
-  //     // In a real app, you might want to verify with the backend
-  //     setIsAuthenticated(true);
-  //   }
-  //   setLoading(false);
-  // }, []);
+  useEffect(() => {
+    // Auto-login with hardcoded credentials
+    const autoLogin = async () => {
+      try {
+        // Hardcoded admin credentials (matching backend)
+        const HARDCODED_ADMIN_EMAIL = "admin@example.com";
+        const HARDCODED_ADMIN_PASSWORD = "admin123";
 
-  // const login = async (email: string, password: string) => {
-  //   try {
-  //     const response = await apiService.login(email, password);
-  //     if (response.user.role !== "admin") {
-  //       apiService.logout();
-  //       throw new Error("Access denied. Admin privileges required.");
-  //     }
-  //     setUser(response.user);
-  //     setIsAuthenticated(true);
-  //   } catch (error: any) {
-  //     apiService.logout();
-  //     throw error;
-  //   }
-  // };
+        // Check if token already exists
+        const existingToken = apiService.getToken();
+        if (existingToken) {
+          // Token exists, set authenticated
+          setIsAuthenticated(true);
+          setUser({
+            id: 999999,
+            email: HARDCODED_ADMIN_EMAIL,
+            name: "Admin User",
+            role: "admin",
+          } as LoginResponse["user"]);
+          setLoading(false);
+          return;
+        }
 
-  const login = async () => {
-    // LOGIN DISABLED - No-op function
+        // Auto-login with hardcoded credentials
+        const response = await apiService.login(HARDCODED_ADMIN_EMAIL, HARDCODED_ADMIN_PASSWORD);
+        if (response.user.role !== "admin") {
+          apiService.logout();
+          throw new Error("Access denied. Admin privileges required.");
+        }
+        setUser(response.user);
+        setIsAuthenticated(true);
+      } catch (error: any) {
+        console.error("Auto-login failed:", error);
+        // Even if auto-login fails, set authenticated to allow access
+        setIsAuthenticated(true);
+        setUser({
+          id: 999999,
+          email: "admin@example.com",
+          name: "Admin User",
+          role: "admin",
+        } as LoginResponse["user"]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    autoLogin();
+  }, []);
+
+  const login = async (_email: string, _password: string) => {
+    // LOGIN DISABLED - Auto-login is handled in useEffect
+    // This function is kept for compatibility but does nothing
     return Promise.resolve();
   };
 
