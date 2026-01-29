@@ -1,5 +1,5 @@
 // LOGIN DISABLED - Login functionality commented out
-import React, { useState } from 'react';
+import React from 'react';
 // import { useNavigate } from 'react-router-dom';
 // import { useAuth } from '../contexts/AuthContext';
 
