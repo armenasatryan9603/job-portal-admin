@@ -1,13 +1,11 @@
 import React, {
   createContext,
   useContext,
-  useEffect,
   useState,
   type ReactNode,
 } from "react";
 
 import type { LoginResponse } from "../types";
-import { apiService } from "../categories/api";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -33,14 +31,14 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // LOGIN DISABLED - Always authenticated
-  const [isAuthenticated, setIsAuthenticated] = useState(true); // Changed to true - no login required
-  const [user, setUser] = useState<LoginResponse["user"] | null>({
+  const [isAuthenticated] = useState(true); // Changed to true - no login required
+  const [user] = useState<LoginResponse["user"] | null>({
     id: 999999,
     email: "admin@example.com",
     name: "Admin User",
     role: "admin",
   } as LoginResponse["user"]);
-  const [loading, setLoading] = useState(false); // Changed to false - no loading needed
+  const [loading] = useState(false); // Changed to false - no loading needed
 
   // useEffect(() => {
   //   // Check if user is already logged in
@@ -69,7 +67,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   //   }
   // };
 
-  const login = async (email: string, password: string) => {
+  const login = async () => {
     // LOGIN DISABLED - No-op function
     return Promise.resolve();
   };
