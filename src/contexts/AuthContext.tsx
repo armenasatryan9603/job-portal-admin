@@ -1,12 +1,13 @@
 import React, {
   createContext,
   useContext,
-  useState,
   useEffect,
-  ReactNode,
+  useState,
+  type ReactNode,
 } from "react";
-import { apiService } from "../categories/api";
+
 import type { LoginResponse } from "../types";
+import { apiService } from "../categories/api";
 
 interface AuthContextType {
   isAuthenticated: boolean;
