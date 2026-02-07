@@ -9,6 +9,7 @@ interface SubscriptionPlan {
   nameHy?: string;
   description?: string;
   price: number;
+  oldPrice?: number | null;
   currency: string;
   durationDays: number;
   isRecurring: boolean;
@@ -93,6 +94,7 @@ const Subscriptions: React.FC = () => {
     descriptionRu: "",
     descriptionHy: "",
     price: "",
+    oldPrice: "",
     currency: "AMD",
     durationDays: "",
     isRecurring: false,
@@ -316,6 +318,7 @@ const Subscriptions: React.FC = () => {
       descriptionRu: "",
       descriptionHy: "",
       price: "",
+      oldPrice: "",
       currency: "AMD",
       durationDays: "",
       isRecurring: false,
@@ -341,6 +344,7 @@ const Subscriptions: React.FC = () => {
       descriptionRu: "",
       descriptionHy: "",
       price: plan.price.toString(),
+      oldPrice: plan.oldPrice ? plan.oldPrice.toString() : "",
       currency: plan.currency,
       durationDays: plan.durationDays.toString(),
       isRecurring: plan.isRecurring,
@@ -357,11 +361,18 @@ const Subscriptions: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const data = {
+      const data: any = {
         ...formData,
         price: parseFloat(formData.price),
         durationDays: parseInt(formData.durationDays),
       };
+      
+      // Handle oldPrice: convert empty string to null, otherwise parse as float
+      if (formData.oldPrice === "" || formData.oldPrice === null || formData.oldPrice === undefined) {
+        data.oldPrice = null;
+      } else {
+        data.oldPrice = parseFloat(formData.oldPrice);
+      }
 
       if (editingPlan) {
         await apiService.updateSubscriptionPlan(editingPlan.id, data);
@@ -491,6 +502,21 @@ const Subscriptions: React.FC = () => {
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Old Price (optional, for discount display)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.oldPrice}
+                  onChange={(e) =>
+                    setFormData({ ...formData, oldPrice: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  placeholder="Leave empty if no discount"
                 />
               </div>
               <div>
@@ -675,10 +701,24 @@ const Subscriptions: React.FC = () => {
                         {plan.description}
                       </p>
                       <div className="mt-2 text-sm text-gray-600">
-                        <span className="font-semibold">
-                          {plan.price.toLocaleString()} {plan.currency}
-                        </span>
-                        <span className="ml-2">for {plan.durationDays} days</span>
+                        {plan.oldPrice ? (
+                          <div className="flex items-baseline gap-2">
+                            <span className="font-semibold line-through text-gray-400">
+                              {plan.oldPrice.toLocaleString()} {plan.currency}
+                            </span>
+                            <span className="font-semibold text-green-600">
+                              {plan.price.toLocaleString()} {plan.currency}
+                            </span>
+                            <span className="ml-2">for {plan.durationDays} days</span>
+                          </div>
+                        ) : (
+                          <>
+                            <span className="font-semibold">
+                              {plan.price.toLocaleString()} {plan.currency}
+                            </span>
+                            <span className="ml-2">for {plan.durationDays} days</span>
+                          </>
+                        )}
                       </div>
                       {/* Features Mapping */}
                       {plan.featuresDescription && plan.featuresDescription.length > 0 && (
